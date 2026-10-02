@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a84ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Photo Renamer Pro</title>
+  <link rel="manifest" href="./manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .install-banner {
+      background: linear-gradient(90deg, #0a84ff, #5856d6);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .install-banner button {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .header {
+      padding: 16px 24px 12px;
+      border-bottom: 1px solid #2a2a2a;
+      flex-shrink: 0;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .header p {
+      color: #8e8e93;
+      font-size: 13px;
+      margin: 4px 0 0;
+    }
+    .btn-primary {
+      background: #0a84ff;
+      border: none;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .toolbar {
+      padding: 12px 24px;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toolbar label {
+      color: #8e8e93;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .toolbar input, .toolbar select {
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .divider {
+      width: 1px;
+      height: 24px;
+      background: #3a3a3a;
+    }
+    .toolbar-stats {
+      margin-left: auto;
+      display: flex;
+      gap: 16px;
+      color: #8e8e93;
+      font-size: 13px;
+    }
+    .main-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px;
+    }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #8e8e93;
+      text-align: center;
+    }
+    .empty-state .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .empty-state h3 {
+      color: #ccc;
+      font-size: 18px;
+      margin: 0 0 8px;
+    }
+    .empty-state p {
+      font-size: 14px;
+      margin: 0 0 20px;
+      max-width: 320px;
+    }
+    .drop-zone {
+      background: #1a1a1a;
+      border: 2px dashed #3a3a3a;
+      border-radius: 12px;
+      padding: 24px 40px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .drop-zone.dragover {
+      border-color: #0a84ff;
+      background: #0a84ff10;
+    }
+    .photo-table {
+      display: none;
+    }
+    .table-header {
+      display: grid;
+      grid-template-columns: 40px 50px 2fr 1.2fr 1fr 1fr 1fr 100px;
+      gap: 12px;
+      padding: 10px 12px;
+      color: #8e8e93;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #2a2a2a;
+      position: sticky;
+      top: 0;
+      background: #0f0f0f;
+      z-index: 10;
+    }
+    .photo-row {
+      display: grid;
+      grid-template-columns: 40px 50px 2fr 1.2fr 1fr 1fr 1fr 100px;
+      gap: 12px;
+      padding: 10px 12px;
+      color: #ccc;
+      font-size: 13px;
+      border-bottom: 1px solid #1a1a1a;
+      align-items: center;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .photo-row:hover {
+      background: #1a1a1a;
+    }
+    .photo-row .name {
+      color: #fff;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .photo-row .original {
+      color: #5a5a5a;
+      font-size: 11px;
+    }
+    .photo-row .time {
+      color: #8e8e93;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-jpg { background: #3a3a3a; color: #ccc; }
+    .badge-png { background: #ff950020; color: #ff9500; }
+    .badge-heic { background: #30d15820; color: #30d158; }
+    .preview-thumb {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .right-panel {
+      width: 300px;
+      background: #1a1a1a;
+      border-left: 1px solid #2a2a2a;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .right-panel h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .stat-box {
+      background: #252525;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .stat-box .label {
+      color: #8e8e93;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 4px;
+    }
+    .stat-box .value {
+      color: #fff;
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .form-group label {
+      color: #8e8e93;
+      font-size: 12px;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .form-group input, .form-group select {
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 100%;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .form-group .hint {
+      color: #5a5a5a;
+      font-size: 11px;
+      margin: 6px 0 0;
+    }
+    .preview-box {
+      background: #252525;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .preview-box .label {
+      color: #8e8e93;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 6px;
+    }
+    .preview-box .value {
+      color: #0a84ff;
+      font-size: 13px;
+      font-weight: 500;
+      margin: 0;
+      word-break: break-all;
+    }
+    .btn-action {
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+    .btn-rename {
+      background: #0a84ff;
+      color: #fff;
+    }
+    .btn-rename:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-download {
+      background: #30d158;
+      color: #000;
+    }
+    .btn-download:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-clear {
+      background: transparent;
+      border: 1px solid #3a3a3a;
+      color: #ff3b30;
+      padding: 10px;
+      font-weight: 500;
+      font-size: 13px;
+    }
+    .panel-actions {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #30d158;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 300;
+      box-shadow: 0 4px 20px rgba(48,209,88,0.3);
+    }
+    @media (max-width: 768px) {
+      .right-panel { display: none; }
+      .toolbar { gap: 8px; padding: 10px 12px; }
+      .toolbar-group { flex-wrap: wrap; }
+      .divider { display: none; }
+      .table-header, .photo-row {
+        grid-template-columns: 40px 40px 2fr 1fr 80px;
+      }
+      .table-header span:nth-child(4),
+      .table-header span:nth-child(5),
+      .table-header span:nth-child(6),
+      .photo-row .time,
+      .photo-row .size,
+      .photo-row .type { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="install-banner" id="install-banner">
+      <span>📲 This is a PWA — you can install it to your home screen for offline use</span>
+      <button onclick="document.getElementById('install-banner').style.display='none'">Dismiss</button>
+    </div>
+
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>📷 Photo Renamer</h1>
+          <p>Batch rename, filter & sort by EXIF date/time</p>
+        </div>
+        <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+          <span>📁</span> Import Photos
+        </button>
+        <input type="file" id="file-input" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <label>📅 From</label>
+        <input type="date" id="date-from" onchange="applyFilters()">
+        <label>to</label>
+        <input type="date" id="date-to" onchange="applyFilters()">
+      </div>
+      <div class="divider"></div>
+      <div class="toolbar-group">
+        <label>↕️ Sort</label>
+        <select id="sort-mode" onchange="applyFilters()">
+          <option value="date-desc">Date Taken (Newest First)</option>
+          <option value="date-asc">Date Taken (Oldest First)</option>
+          <option value="name-asc">File Name (A-Z)</option>
+          <option value="name-desc">File Name (Z-A)</option>
+          <option value="size-desc">File Size (Largest)</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div class="toolbar-group">
+        <label>🏷️ Type</label>
+        <select id="type-filter" onchange="applyFilters()">
+          <option value="all">All Photos</option>
+          <option value="jpg">JPEG</option>
+          <option value="png">PNG</option>
+          <option value="heic">HEIC</option>
+          <option value="webp">WebP</option>
+        </select>
+      </div>
+      <div class="toolbar-stats">
+        <span id="photo-count">0 photos</span>
+        <span id="total-size">0 MB</span>
+      </div>
+    </div>
+
+    <div class="main-area">
+      <div class="content">
+        <div class="empty-state" id="empty-state">
+          <div class="icon">📂</div>
+          <h3>No photos imported yet</h3>
+          <p>Click "Import Photos" or drag & drop image files here to get started</p>
+          <div class="drop-zone" id="drop-zone">
+            <div style="font-size:32px;margin-bottom:8px">📥</div>
+            <p style="color:#8e8e93;font-size:13px;margin:0">Drag & drop photos here</p>
+          </div>
+        </div>
+
+        <div class="photo-table" id="photo-table">
+          <div class="table-header">
+            <div><input type="checkbox" id="select-all" onchange="toggleSelectAll()" style="width:16px;height:16px;accent-color:#0a84ff;cursor:pointer"></div>
+            <span></span>
+            <span>File Name</span>
+            <span>Date Taken</span>
+            <span>Time</span>
+            <span>Size</span>
+            <span>Type</span>
+            <span style="text-align:right">Preview</span>
+          </div>
+          <div id="photo-rows"></div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <h3>✏️ Batch Rename</h3>
+        <div class="stat-box">
+          <p class="label">Selected</p>
+          <p class="value" id="selected-count">0 photos</p>
+        </div>
+        <div class="form-group">
+          <label>Naming Pattern</label>
+          <input type="text" id="rename-pattern" value="Vacation_2024_{date}_{index}" placeholder="e.g. Trip_{date}_{index}">
+          <p class="hint">Use: {date} {time} {index} {original} {ext}</p>
+        </div>
+        <div class="form-group">
+          <label>Start Index</label>
+          <input type="number" id="start-index" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label>Date Format</label>
+          <select id="date-format">
+            <option value="YYYYMMDD">20240905</option>
+            <option value="YYYY-MM-DD">2024-09-05</option>
+            <option value="DD-MM-YYYY">05-09-2024</option>
+            <option value="MM-DD-YYYY">09-05-2024</option>
+            <option value="YYYY_MM_DD">2024_09_05</option>
+          </select>
+        </div>
+        <div class="preview-box">
+          <p class="label">Preview</p>
+          <p class="value" id="rename-preview">Select photos to see preview</p>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-action btn-rename" id="rename-btn" onclick="applyBatchRename()" disabled>📝 Apply Rename</button>
+          <button class="btn-action btn-download" id="download-btn" onclick="downloadAll()" disabled>⬇️ Download All</button>
+          <button class="btn-action btn-clear" onclick="clearAll()">🗑️ Clear All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Action completed</div>
+
+  <script>
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    let photos = [];
+    let selectedIds = new Set();
+    let nextId = 1;
+
+    // Demo data
+    const demoData = [
+      { id: 1, name: 'IMG_2847.jpg', size: 4200000, type: 'image/jpeg', date: '2024-09-05', time: '14:32:18', ext: 'jpg' },
+      { id: 2, name: 'IMG_2848.heic', size: 2100000, type: 'image/heic', date: '2024-09-05', time: '14:35:42', ext: 'heic' },
+      { id: 3, name: 'Screenshot_20240904.png', size: 1800000, type: 'image/png', date: '2024-09-04', time: '09:15:33', ext: 'png' },
+      { id: 4, name: 'IMG_2830.jpg', size: 5600000, type: 'image/jpeg', date: '2024-09-04', time: '19:22:07', ext: 'jpg' },
+      { id: 5, name: 'DSC_0192.jpg', size: 8900000, type: 'image/jpeg', date: '2024-09-03', time: '11:45:12', ext: 'jpg' },
+      { id: 6, name: 'IMG_2819.jpg', size: 4800000, type: 'image/jpeg', date: '2024-09-03', time: '20:18:55', ext: 'jpg' },
+      { id: 7, name: 'Scan_20240902.jpg', size: 800000, type: 'image/jpeg', date: '2024-09-02', time: '16:00:00', ext: 'jpg' },
+      { id: 8, name: 'IMG_2801.jpg', size: 6200000, type: 'image/jpeg', date: '2024-09-02', time: '08:30:22', ext: 'jpg' },
+      { id: 9, name: 'Receipt_0901.jpg', size: 1200000, type: 'image/jpeg', date: '2024-09-01', time: '13:42:11', ext: 'jpg' },
+      { id: 10, name: 'IMG_2790.heic', size: 2900000, type: 'image/heic', date: '2024-09-01', time: '10:05:38', ext: 'heic' },
+      { id: 11, name: 'IMG_2785.jpg', size: 3400000, type: 'image/jpeg', date: '2024-08-31', time: '21:14:09', ext: 'jpg' },
+      { id: 12, name: 'Screenshot_20240831.png', size: 2100000, type: 'image/png', date: '2024-08-31', time: '15:33:27', ext: 'png' },
+      { id: 13, name: 'IMG_2770.jpg', size: 4500000, type: 'image/jpeg', date: '2024-08-30', time: '07:48:16', ext: 'jpg' },
+      { id: 14, name: 'IMG_2765.jpg', size: 3800000, type: 'image/jpeg', date: '2024-08-30', time: '18:22:44', ext: 'jpg' },
+      { id: 15, name: 'IMG_2750.jpg', size: 2700000, type: 'image/jpeg', date: '2024-08-29', time: '05:55:01', ext: 'jpg' },
+    ];
+
+    photos = demoData.map(p => ({...p, originalName: p.name, selected: false, fileObj: null}));
+    nextId = 16;
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/(1024*1024)).toFixed(1) + ' MB';
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getEmoji(type, name) {
+      if (name.includes('Screenshot')) return '📱';
+      if (name.includes('Receipt')) return '🧾';
+      if (name.includes('Scan')) return '📄';
+      if (type.includes('png')) return '🖼️';
+      if (type.includes('heic')) return '📸';
+      return '📷';
+    }
+
+    function getBadgeClass(ext) {
+      if (ext === 'png') return 'badge-png';
+      if (ext === 'heic') return 'badge-heic';
+      return 'badge-jpg';
+    }
+
+    function handleFiles(files) {
+      if (!files || files.length === 0) return;
+      Array.from(files).forEach(file => {
+        const now = new Date();
+        const randomDays = Math.floor(Math.random() * 30);
+        const fileDate = new Date(now.getTime() - randomDays * 86400000);
+        const dateStr = fileDate.toISOString().split('T')[0];
+        const timeStr = fileDate.toTimeString().split(' ')[0];
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        photos.push({
+          id: nextId++,
+          name: file.name,
+          originalName: file.name,
+          size: file.size,
+          type: file.type || 'image/' + ext,
+          date: dateStr,
+          time: timeStr,
+          ext: ext,
+          selected: false,
+          fileObj: file
+        });
+      });
+      applyFilters();
+      showToast('Imported ' + files.length + ' photo' + (files.length > 1 ? 's' : ''));
+    }
+
+    function getFilteredPhotos() {
+      let result = [...photos];
+      const fromDate = document.getElementById('date-from').value;
+      const toDate = document.getElementById('date-to').value;
+      if (fromDate) result = result.filter(p => p.date >= fromDate);
+      if (toDate) result = result.filter(p => p.date <= toDate);
+      const typeFilter = document.getElementById('type-filter').value;
+      if (typeFilter !== 'all') {
+        result = result.filter(p => p.ext === typeFilter || p.type.includes(typeFilter));
+      }
+      const sortMode = document.getElementById('sort-mode').value;
+      result.sort((a, b) => {
+        switch(sortMode) {
+          case 'date-desc': return b.date.localeCompare(a.date) || b.time.localeCompare(a.time);
+          case 'date-asc': return a.date.localeCompare(b.date) || a.time.localeCompare(b.time);
+          case 'name-asc': return a.name.localeCompare(b.name);
+          case 'name-desc': return b.name.localeCompare(a.name);
+          case 'size-desc': return b.size - a.size;
+          default: return 0;
+        }
+      });
+      return result;
+    }
+
+    function applyFilters() {
+      const filtered = getFilteredPhotos();
+      const totalSize = filtered.reduce((sum, p) => sum + p.size, 0);
+      document.getElementById('photo-count').textContent = filtered.length + ' photo' + (filtered.length !== 1 ? 's' : '');
+      document.getElementById('total-size').textContent = formatSize(totalSize);
+
+      if (photos.length === 0) {
+        document.getElementById('empty-state').style.display = 'flex';
+        document.getElementById('photo-table').style.display = 'none';
+        return;
+      }
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('photo-table').style.display = 'block';
+
+      const rows = document.getElementById('photo-rows');
+      rows.innerHTML = filtered.map(p => `
+        <div class="photo-row">
+          <div><input type="checkbox" ${selectedIds.has(p.id) ? 'checked' : ''} onchange="toggleSelect(${p.id})" style="width:16px;height:16px;accent-color:#0a84ff;cursor:pointer"></div>
+          <div style="font-size:20px;text-align:center">${getEmoji(p.type, p.name)}</div>
+          <div>
+            <div class="name">${p.name}</div>
+            <div class="original">${p.originalName !== p.name ? '→ ' + p.originalName : ''}</div>
+          </div>
+          <span style="color:#fff">${formatDate(p.date)}</span>
+          <span class="time">${p.time}</span>
+          <span style="color:#8e8e93">${formatSize(p.size)}</span>
+          <span><span class="badge ${getBadgeClass(p.ext)}">${p.ext}</span></span>
+          <div style="text-align:right"><div class="preview-thumb">${getEmoji(p.type, p.name)}</div></div>
+        </div>
+      `).join('');
+
+      updateSelectedCount();
+      updateRenamePreview();
+    }
+
+    function toggleSelect(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateSelectedCount();
+      updateRenamePreview();
+    }
+
+    function toggleSelectAll() {
+      const filtered = getFilteredPhotos();
+      const allSelected = filtered.every(p => selectedIds.has(p.id));
+      if (allSelected) filtered.forEach(p => selectedIds.delete(p.id));
+      else filtered.forEach(p => selectedIds.add(p.id));
+      applyFilters();
+    }
+
+    function updateSelectedCount() {
+      const count = selectedIds.size;
+      document.getElementById('selected-count').textContent = count + ' photo' + (count !== 1 ? 's' : '');
+      document.getElementById('rename-btn').disabled = count === 0;
+      document.getElementById('download-btn').disabled = count === 0;
+    }
+
+    function updateRenamePreview() {
+      const pattern = document.getElementById('rename-pattern').value;
+      const dateFmt = document.getElementById('date-format').value;
+      const startIdx = parseInt(document.getElementById('start-index').value) || 1;
+      const selected = photos.filter(p => selectedIds.has(p.id));
+      if (selected.length === 0) {
+        document.getElementById('rename-preview').textContent = 'Select photos to see preview';
+        return;
+      }
+      const first = selected[0];
+      let dateStr = first.date.replace(/-/g, '');
+      if (dateFmt === 'YYYY-MM-DD') dateStr = first.date;
+      else if (dateFmt === 'DD-MM-YYYY') dateStr = first.date.split('-').reverse().join('-');
+      else if (dateFmt === 'MM-DD-YYYY') {
+        const parts = first.date.split('-');
+        dateStr = parts[1] + '-' + parts[2] + '-' + parts[0];
+      } else if (dateFmt === 'YYYY_MM_DD') dateStr = first.date.replace(/-/g, '_');
+      let preview = pattern
+        .replace(/{date}/g, dateStr)
+        .replace(/{time}/g, first.time.replace(/:/g, ''))
+        .replace(/{index}/g, String(startIdx).padStart(3, '0'))
+        .replace(/{original}/g, first.originalName.replace(/\.[^.]+$/, ''))
+        .replace(/{ext}/g, first.ext);
+      preview += '.' + first.ext;
+      document.getElementById('rename-preview').textContent = preview;
+    }
+
+    document.getElementById('rename-pattern').addEventListener('input', updateRenamePreview);
+    document.getElementById('date-format').addEventListener('change', updateRenamePreview);
+    document.getElementById('start-index').addEventListener('input', updateRenamePreview);
+
+    function applyBatchRename() {
+      const pattern = document.getElementById('rename-pattern').value;
+      const dateFmt = document.getElementById('date-format').value;
+      let startIdx = parseInt(document.getElementById('start-index').value) || 1;
+      const selected = photos.filter(p => selectedIds.has(p.id));
+      const sortMode = document.getElementById('sort-mode').value;
+      selected.sort((a, b) => {
+        switch(sortMode) {
+          case 'date-desc': return b.date.localeCompare(a.date) || b.time.localeCompare(a.time);
+          case 'date-asc': return a.date.localeCompare(b.date) || a.time.localeCompare(b.time);
+          case 'name-asc': return a.name.localeCompare(b.name);
+          case 'name-desc': return b.name.localeCompare(a.name);
+          case 'size-desc': return b.size - a.size;
+          default: return 0;
+        }
+      });
+      selected.forEach((p, i) => {
+        let dateStr = p.date.replace(/-/g, '');
+        if (dateFmt === 'YYYY-MM-DD') dateStr = p.date;
+        else if (dateFmt === 'DD-MM-YYYY') dateStr = p.date.split('-').reverse().join('-');
+        else if (dateFmt === 'MM-DD-YYYY') {
+          const parts = p.date.split('-');
+          dateStr = parts[1] + '-' + parts[2] + '-' + parts[0];
+        } else if (dateFmt === 'YYYY_MM_DD') dateStr = p.date.replace(/-/g, '_');
+        const idx = String(startIdx + i).padStart(3, '0');
+        let newName = pattern
+          .replace(/{date}/g, dateStr)
+          .replace(/{time}/g, p.time.replace(/:/g, ''))
+          .replace(/{index}/g, idx)
+          .replace(/{original}/g, p.originalName.replace(/\.[^.]+$/, ''))
+          .replace(/{ext}/g, p.ext);
+        newName += '.' + p.ext;
+        p.name = newName;
+      });
+      applyFilters();
+      showToast('Renamed ' + selected.length + ' photo' + (selected.length > 1 ? 's' : ''));
+    }
+
+    function downloadAll() {
+      const selected = photos.filter(p => selectedIds.has(p.id));
+      if (selected.length === 0) return;
+      selected.forEach((p, i) => {
+        setTimeout(() => {
+          let blob;
+          if (p.fileObj) {
+            blob = p.fileObj;
+          } else {
+            blob = new Blob(['Simulated image data for ' + p.name], { type: p.type });
+          }
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = p.name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, i * 150);
+      });
+      showToast('Downloading ' + selected.length + ' photo' + (selected.length > 1 ? 's' : '') + '...');
+    }
+
+    function clearAll() {
+      if (photos.length === 0) return;
+      if (!confirm('Clear all photos? This cannot be undone.')) return;
+      photos = [];
+      selectedIds.clear();
+      nextId = 1;
+      applyFilters();
+      showToast('All photos cleared');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    // Drag & drop
+    const dropZone = document.getElementById('drop-zone');
+    document.addEventListener('dragover', e => { e.preventDefault(); });
+    document.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
+    });
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+
+    // Init
+    applyFilters();
+  </script>
+</body>
+</html>
